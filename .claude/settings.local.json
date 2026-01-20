@@ -1,28 +1,18 @@
 {
   "permissions": {
     "allow": [
-      "Skill(sp.implement)",
-      "Bash(powershell -Command \"git rev-parse --git-dir\")",
-      "Bash(powershell -ExecutionPolicy Bypass -File \".specify/scripts/powershell/check-prerequisites.ps1\" -Json -RequireTasks -IncludeTasks)",
-      "Bash(python -c \"from app.main import app; print\\(''Import successful''\\)\")",
-      "Bash(.specify/scripts/powershell/check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks)",
-      "Bash(npm install)",
-      "Bash(npm run dev)",
-      "Skill(sp.phr)",
-      "Bash(.specify/scripts/bash/create-phr.sh --title \"Remove-Better-Auth-Frontend\" --stage \"refactor\" --json)",
-      "Bash(git config user.name)",
-      "Bash(pip install -r requirements.txt)",
-      "Bash(python -m uvicorn app.main:app --reload)",
-      "Bash(python -m uvicorn app.main:app --port 8001 --reload)",
-      "Bash(python -m uvicorn app.main:app --port 8002 --reload)",
-      "Bash(find . -name \"*.py\" -path \"./backend/*\" -exec grep -l \"better\" {} ;)",
-      "Bash(powershell -Command \".specify/scripts/powershell/check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks\")",
-      "Bash(dir .components)",
-      "Bash(while read file)",
-      "Bash(do grep -l \"AuthProvider\" \"$file\")",
-      "Bash(done)",
-      "Bash(ls:*)",
-      "Bash(dir D:todo-appfrontend*.config.*)"
+      "Bash(dir /s *.py)",
+      "Bash(findstr alembic)",
+      "Bash(dir /ad)",
+      "Bash(dir)",
+      "Bash(python -c \"\nimport sqlite3\nconn = sqlite3.connect\\(''todo_app.db''\\)\ncursor = conn.cursor\\(\\)\ncursor.execute\\(''PRAGMA table_info\\(task\\)''\\)\nrows = cursor.fetchall\\(\\)\nfor row in rows:\n    print\\(row\\)\nconn.close\\(\\)\n\")",
+      "Bash(python test_user_id_fix.py)",
+      "Bash(python test_task_crud_fix.py)",
+      "Bash(python -m uvicorn app.main:app --port 8000)",
+      "Bash(pip install python-dotenv)",
+      "Bash(python start_server.py)",
+      "Bash(python test_fixes.py)",
+      "Bash(python repair_task_schema.py)"
     ]
   }
 }
