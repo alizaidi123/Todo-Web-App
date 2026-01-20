@@ -1,0 +1,93 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Dark theme base */
+  --background-dark: #0f0f1b;
+  --background-card: rgba(255, 255, 255, 0.06);
+  --text-primary: #ffffff;
+  --text-secondary: #a0a0b0;
+  --border-light: rgba(255, 255, 255, 0.12);
+
+  /* Neon purple accents */
+  --neon-purple-500: #8b5cf6;
+  --neon-purple-600: #7c3aed;
+  --neon-purple-gradient-start: #8b5cf6;
+  --neon-purple-gradient-end: #d946ef;
+
+  /* Cyan accents */
+  --neon-cyan-400: #22d3ee;
+  --neon-cyan-500: #06b6d4;
+
+  /* Glassmorphism effects */
+  --glass-bg: rgba(255, 255, 255, 0.1);
+  --glass-border: rgba(255, 255, 255, 0.18);
+  --glass-backdrop: blur(12px);
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+  background-color: var(--background-dark);
+  color: var(--text-primary);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-backdrop);
+  -webkit-backdrop-filter: var(--glass-backdrop);
+  border: 1px solid var(--glass-border);
+  border-radius: 1rem;
+}
+
+.neon-button {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.neon-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: left 0.5s;
+}
+
+.neon-button:hover::before {
+  left: 100%;
+}
+
+.neon-focus:focus-visible {
+  outline: 2px solid var(--neon-purple-500);
+  outline-offset: 2px;
+}
+
+.neon-shadow {
+  box-shadow: 0 0 15px rgba(139, 92, 246, 0.5);
+}
+
+.neon-shadow-hover:hover {
+  box-shadow: 0 0 25px rgba(139, 92, 246, 0.7);
+}

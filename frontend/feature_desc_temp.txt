@@ -1,0 +1,53 @@
+We have a Next.js todo app with Better Auth already working. DO NOT modify anything related to authentication: do not touch better-auth config, auth routes, middleware, session logic, login/signup pages, token storage, or API auth headers logic. Signup/login MUST remain working exactly as-is.
+
+Goal: redesign the Tasks dashboard UI to be modern, polished, Gen-Z style (like the sample “TaskMaster” UI screenshot). Current UI looks unstyled.
+
+Scope (Frontend only):
+
+Redesign the Tasks dashboard page UI (where tasks are listed, created, edited, deleted, completed).
+
+Keep all existing task CRUD logic working (Create/List/Update/Delete/Toggle complete), keep existing API calls and endpoints unchanged.
+
+Improve layout, typography, spacing, responsiveness, and add modern components styling.
+
+Design requirements:
+
+Use TailwindCSS for styling (assume Tailwind is already set up; if not, add it minimally without breaking anything).
+
+Clean modern card layout: centered container, subtle background gradient, card with shadow, rounded corners.
+
+A nice header area with title + subtitle.
+
+A “stats row” (optional but nice): Total / Active / Completed counts.
+
+Task creation form should look like a modern form (inputs, labels/placeholder, button with gradient).
+
+Task list items should be card rows with:
+
+checkbox toggle
+
+title + description
+
+created timestamp in small muted text
+
+Edit + Delete buttons styled as modern pill buttons
+
+Editing should be inline and styled (inputs appear inside the task card).
+
+Completed tasks should visually differ (strike-through + muted + subtle badge).
+
+Add filter pills: All / Active / Completed that look like modern segmented controls.
+
+Add Search input styled nicely.
+
+Add loading states / disabled states but make them visually clean.
+
+Add toast-like inline feedback OR subtle status labels (no external libs unless already installed).
+
+Must be responsive: mobile-friendly layout with stacked form and full-width buttons.
+
+Implementation constraints:
+
+Only change UI/UX; do NOT change backend.
+
+Do N

@@ -1,0 +1,40 @@
+# Speckit Constitution - Phase II Hackathon Todo
+
+## Project Governance
+
+This project uses **Spec-Driven Development ONLY**. No manual coding is allowed. All code must be generated via `speckit.implement`.
+
+## Technical Stack (Fixed - Cannot Be Changed)
+
+- **Frontend**: Next.js (App Router)
+- **Backend**: FastAPI
+- **ORM**: SQLModel
+- **Database**: Neon Serverless PostgreSQL
+- **Auth**: Better Auth (frontend) + JWT (backend)
+
+## Backend Architecture Requirements
+
+- Backend must be **stateless**
+- JWT is the **only** auth mechanism
+- Backend must **never** call Better Auth
+- All API routes require `Authorization: Bearer <token>`
+- User identity must come **ONLY** from JWT
+- All data access must be scoped to authenticated user
+
+## Development Principles
+
+- **Simplicity and clarity** are preferred over abstraction
+- Follow Spec-Driven Development methodology strictly
+- Use `speckit.implement` for all code generation
+- Maintain clean separation between frontend and backend concerns
+- Ensure security through proper authentication and authorization
+
+## Compliance Checklist
+
+Before merging any changes, ensure:
+- [ ] All code was generated via `speckit.implement`
+- [ ] Backend is stateless
+- [ ] All API routes have JWT authentication
+- [ ] User data access is properly scoped
+- [ ] No direct calls to Better Auth from backend
+- [ ] JWT is the only auth mechanism used

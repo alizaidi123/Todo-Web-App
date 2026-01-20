@@ -1,0 +1,184 @@
+Changes made to handle 204 No Content responses:
+
+diff --git a/lib/api.ts b/lib/api.ts
+--- a/lib/api.ts
++++ b/lib/api.ts
+@@ -12,26 +12,37 @@
+  private async request(endpoint: string, options: RequestInit = {}) {
+    // Ensure proper URL joining by removing leading slash from endpoint if baseUrl ends with slash
+    // and ensure endpoint starts with slash if baseUrl doesn't end with slash
+    let normalizedEndpoint = endpoint.startsWith('/') ? endpoint : '/' + endpoint;
+    const url = `${this.baseUrl}${normalizedEndpoint}`;
+
+    const response = await authenticatedFetch(url, options);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+-    return response.json();
++    // Handle 204 No Content responses and other responses that may have empty bodies
++    if (response.status === 204 || response.headers.get('Content-Length') === '0') {
++      return null;
++    }
++
++    // For other successful responses, check if there's content before parsing JSON
++    const contentType = response.headers.get('content-type');
++    if (contentType && contentType.includes('application/json')) {
++      const text = await response.text();
++      return text ? JSON.parse(text) : null;
++    }
++
++    // If not JSON, try to return the text content
++    return await response.text();
+  }
+
+diff --git a/app/page.tsx b/app/page.tsx
+--- a/app/page.tsx
++++ b/app/page.tsx
+@@ -77,27 +77,36 @@
+  const createTask = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+-      const createdTask = await apiClient.post<Task>('/api/tasks', newTask);
+-      // Normalize the new task's ID to number
+-      const normalizedTask = {
+-        ...createdTask,
+-        id: Number(createdTask.id)
+-      };
+-      setTasks(prevTasks => [...prevTasks, normalizedTask]);
+-      setNewTask({ title: '', description: '' });
++      const response = await apiClient.post<any>('/api/tasks', newTask);
++
++      // If response is null (unexpected for create), we can't add the task
++      if (response === null) {
++        console.error('Create task returned null response');
++        return;
++      }
++
++      // Normalize the new task's ID to number
++      const normalizedTask = {
++        ...response,
++        id: Number(response.id)
++      };
++      setTasks(prevTasks => [...prevTasks, normalizedTask]);
++      setNewTask({ title: '', description: '' });
+    } catch (error) {
+      console.error('Failed to create task:', error);
+      // If unauthorized, redirect to login
+      if ((error as any).toString().includes('401')) {
+        removeToken();
+        router.push('/login');
+      }
+    }
+  };
+@@ -99,30 +99,40 @@
+  const toggleTaskCompletion = async (taskId: number) => {
+    setTogglingTask(taskId);
+
+    try {
+-      const updatedTask = await apiClient.patch<Task>(`/api/tasks/${taskId}/complete`);
+
+-      // Update the task in the local state using numeric comparison to handle potential type mismatches
+-      setTasks(prevTasks => prevTasks.map(task =>
+-        Number(task.id) === Number(taskId) ? updatedTask : task
+-      ));
++      const response = await apiClient.patch<any>(`/api/tasks/${taskId}/complete`);
+
++      // If the response is null (e.g., 204 No Content), we can still consider it successful
++      // and optimistically update the task's completed status
++      if (response === null) {
++        // Update the task in the local state by flipping the completed status
++        setTasks(prevTasks => prevTasks.map(task =>
++          Number(task.id) === Number(taskId) ? { ...task, completed: !task.completed } : task
++        ));
++      } else {
++        // Update the task in the local state using the response from the server
++        setTasks(prevTasks => prevTasks.map(task =>
++          Number(task.id) === Number(taskId) ? response : task
++        ));
++      }
+    } catch (error) {
+      console.error('Failed to update task:', error);
+      // If unauthorized, redirect to login
+      if ((error as any).toString().includes('401')) {
+        removeToken();
+        router.push('/login');
+      }
+    } finally {
+      setTogglingTask(null);
+    }
+  };
+@@ -121,14 +130,16 @@
+  const deleteTask = async (taskId: number) => {
+    // Prevent double deletion by checking if already deleting
+    if (deletingTask === taskId) return;
+
+    setDeletingTask(taskId);
+
+    try {
++      // Treat successful delete (even with null response for 204) as success
+      await apiClient.delete(`/api/tasks/${taskId}`);
+
+      // Remove the task from the local state using numeric comparison to handle potential type mismatches
+      setTasks(prevTasks => prevTasks.filter(task => Number(task.id) !== Number(taskId)));
+    } catch (error) {
+      console.error('Failed to delete task:', error);
+      // If unauthorized, redirect to login
+      if ((error as any).toString().includes('401')) {
+        removeToken();
+        router.push('/login');
+      }
+    } finally {
+      setDeletingTask(null);
+    }
+  };
+@@ -166,39 +166,48 @@
+  const saveEditedTask = async (taskId: number) => {
+    if (!editingTask || Number(editingTask.id) !== Number(taskId)) return;
+
+    setSavingTask(taskId);
+    setSaveError(null);
+
+    try {
+-      const updatedTask = await apiClient.put<Task>(`/api/tasks/${taskId}`, {
++      const response = await apiClient.put<any>(`/api/tasks/${taskId}`, {
+        title: editingTask.title,
+        description: editingTask.description,
+        completed: tasks.find(t => Number(t.id) === Number(taskId))?.completed
+      });
+
++      // If response is null (e.g., 204 No Content), we'll use the edited values
++      const updatedTask = response || {
++        ...tasks.find(t => Number(t.id) === Number(taskId)),
++        title: editingTask.title,
++        description: editingTask.description,
++        completed: tasks.find(t => Number(t.id) === Number(taskId))?.completed
++      };
+
+-      // Update the task in the local state using numeric comparison to handle potential type mismatches
+-      setTasks(prevTasks => prevTasks.map(task =>
+-        Number(task.id) === Number(taskId) ? updatedTask : task
+-      ));
+
+-      setEditingTask(null);
++      // Update the task in the local state using numeric comparison to handle potential type mismatches
++      setTasks(prevTasks => prevTasks.map(task =>
++        Number(task.id) === Number(taskId) ? updatedTask : task
++      ));
+
+      setEditingTask(null);
+    } catch (error) {
+      console.error('Failed to update task:', error);
+      setSaveError('Failed to update task. Please try again.');
+
+      // If unauthorized, redirect to login
+      if ((error as any).toString().includes('401')) {
+        removeToken();
+        router.push('/login');
+      }
+    } finally {
+      setSavingTask(null);
+    }
+  };

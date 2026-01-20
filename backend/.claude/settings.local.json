@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir /s *.py)",
+      "Bash(findstr alembic)",
+      "Bash(dir /ad)",
+      "Bash(dir)",
+      "Bash(python -c \"\nimport sqlite3\nconn = sqlite3.connect\\(''todo_app.db''\\)\ncursor = conn.cursor\\(\\)\ncursor.execute\\(''PRAGMA table_info\\(task\\)''\\)\nrows = cursor.fetchall\\(\\)\nfor row in rows:\n    print\\(row\\)\nconn.close\\(\\)\n\")",
+      "Bash(python test_user_id_fix.py)",
+      "Bash(python test_task_crud_fix.py)",
+      "Bash(python -m uvicorn app.main:app --port 8000)",
+      "Bash(pip install python-dotenv)",
+      "Bash(python start_server.py)",
+      "Bash(python test_fixes.py)",
+      "Bash(python repair_task_schema.py)"
+    ]
+  }
+}

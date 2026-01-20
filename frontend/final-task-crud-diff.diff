@@ -1,0 +1,206 @@
+Final diff for all changes made to app/page.tsx:
+
+diff --git a/app/page.tsx b/app/page.tsx
+--- a/app/page.tsx
++++ b/app/page.tsx
+@@ -1,18 +1,19 @@
+ 'use client';
+
+ import { useState, useEffect } from 'react';
+ import { Task } from '../types';
+ import { apiClient } from '../lib/api';
+ import { getToken, removeToken } from '../lib/auth-utils';
+ import { useRouter } from 'next/navigation';
+
+ export default function Dashboard() {
+   const [tasks, setTasks] = useState<Task[]>([]);
+   const [newTask, setNewTask] = useState({ title: '', description: '' });
+   const [editingTask, setEditingTask] = useState<{ id: number; title: string; description?: string } | null>(null);
++  const [savingTask, setSavingTask] = useState<number | null>(null); // Track saving state for specific tasks
+   const [saveError, setSaveError] = useState<string | null>(null);
++  const [togglingTask, setTogglingTask] = useState<number | null>(null); // Track toggling state for specific tasks
++  const [deletingTask, setDeletingTask] = useState<number | null>(null); // Track deleting state for specific tasks
++  const [isRefreshing, setIsRefreshing] = useState(false); // Track global refresh state
+   const [loading, setLoading] = useState(true);
+   const router = useRouter();
+
+@@ -34,9 +37,13 @@
+   const loadTasks = async () => {
+     try {
+       const data = await apiClient.get<Task[]>('/api/tasks');
++      // Normalize task IDs to numbers to handle potential type mismatches
++      const normalizedData = data.map(task => ({
++        ...task,
++        id: Number(task.id)
++      }));
+-      setTasks(data);
++      setTasks(normalizedData);
+     } catch (error) {
+       console.error('Failed to load tasks:', error);
+       // If unauthorized, redirect to login
+@@ -55,9 +61,13 @@
+   const refreshTasks = async () => {
+     setIsRefreshing(true);
+     try {
+       const data = await apiClient.get<Task[]>('/api/tasks');
++      // Normalize task IDs to numbers to handle potential type mismatches
++      const normalizedData = data.map(task => ({
++        ...task,
++        id: Number(task.id)
++      }));
+-      setTasks(data);
++      setTasks(normalizedData);
+     } catch (error) {
+       console.error('Failed to refresh tasks:', error);
+       // If unauthorized, redirect to login
+@@ -77,9 +86,13 @@
+   const createTask = async (e: React.FormEvent) => {
+-    try {
++    e.preventDefault();
+
+     try {
+       const createdTask = await apiClient.post<Task>('/api/tasks', newTask);
++      // Normalize the new task's ID to number
++      const normalizedTask = {
++        ...createdTask,
++        id: Number(createdTask.id)
++      };
+-      setTasks(prevTasks => [...prevTasks, createdTask]);
++      setTasks(prevTasks => [...prevTasks, normalizedTask]);
+       setNewTask({ title: '', description: '' });
+     } catch (error) {
+       console.error('Failed to create task:', error);
+@@ -84,5 +97,5 @@
+   const toggleTaskCompletion = async (taskId: number) => {
+     setTogglingTask(taskId);
+
+     try {
+       const updatedTask = await apiClient.patch<Task>(`/api/tasks/${taskId}/complete`);
+
+       // Update the task in the local state using numeric comparison to handle potential type mismatches
+-      setTasks(prevTasks => prevTasks.map(task =>
+-        task.id === taskId ? updatedTask : task
+-      ));
++      setTasks(prevTasks => prevTasks.map(task =>
++        Number(task.id) === Number(taskId) ? updatedTask : task
++      ));
+     } catch (error) {
+       console.error('Failed to update task:', error);
+@@ -106,5 +119,5 @@
+   const deleteTask = async (taskId: number) => {
+-    try {
++    // Prevent double deletion by checking if already deleting
++    if (deletingTask === taskId) return;
+
+     setDeletingTask(taskId);
+
+     try {
+       await apiClient.delete(`/api/tasks/${taskId}`);
+
+       // Remove the task from the local state using numeric comparison to handle potential type mismatches
+-      setTasks(prevTasks => prevTasks.filter(task => task.id !== taskId));
++      setTasks(prevTasks => prevTasks.filter(task => Number(task.id) !== Number(taskId)));
+     } catch (error) {
+       console.error('Failed to delete task:', error);
+@@ -141,17 +154,17 @@
+   const saveEditedTask = async (taskId: number) => {
+-    if (!editingTask) return;
++    if (!editingTask || Number(editingTask.id) !== Number(taskId)) return;
+
+-    try {
++    setSavingTask(taskId);
++    setSaveError(null);
+
+     try {
+       const updatedTask = await apiClient.put<Task>(`/api/tasks/${taskId}`, {
+         title: editingTask.title,
+         description: editingTask.description,
+-        completed: tasks.find(t => t.id === taskId)?.completed
++        completed: tasks.find(t => Number(t.id) === Number(taskId))?.completed
+       });
+
+       // Update the task in the local state
+-      setTasks(tasks.map(task =>
+-        task.id === taskId ? updatedTask : task
+-      ));
++      // Update the task in the local state using numeric comparison to handle potential type mismatches
++      setTasks(prevTasks => prevTasks.map(task =>
++        Number(task.id) === Number(taskId) ? updatedTask : task
++      ));
+
+       setEditingTask(null);
+     } catch (error) {
+       console.error('Failed to update task:', error);
++      setSaveError('Failed to update task. Please try again.');
+
+       // If unauthorized, redirect to login
+-      if ((error as any).toString().includes('401')) {
+-        removeToken();
+-        router.push('/login');
+-      }
+-    }
++      if ((error as any).toString().includes('401')) {
++        removeToken();
++        router.push('/login');
++      }
+     } finally {
++      setSavingTask(null);
+     }
+   };
+@@ -129,7 +150,7 @@
+   const startEditing = (task: Task) => {
+     setEditingTask({
+-      id: task.id,
++      id: Number(task.id), // Normalize to number
+       title: task.title,
+       description: task.description
+     });
+   };
+
+@@ -185,6 +206,14 @@
+       <div className="flex justify-between items-center mb-6">
+         <h1 className="text-3xl font-bold">My Tasks</h1>
++        <div className="flex space-x-2">
++          <button
++            onClick={refreshTasks}
++            disabled={isRefreshing}
++            className={`px-4 py-2 rounded ${isRefreshing ? 'bg-gray-300 cursor-not-allowed' : 'bg-gray-500 hover:bg-gray-600'} text-white`}
++          >
++            {isRefreshing ? 'Refreshing...' : 'Refresh'}
++          </button>
+           <button
+             onClick={handleLogout}
+             className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+@@ -255,6 +284,7 @@
+                     <div className="flex space-x-2">
+                       <button
++                        type="button"
+                         onClick={() => saveEditedTask(task.id)}
+                         disabled={savingTask === task.id}
+                         className={`bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 ${savingTask === task.id ? 'opacity-50 cursor-not-allowed' : ''}`}
+@@ -264,6 +294,7 @@
+                       <button
++                        type="button"
+                         onClick={cancelEditing}
+                         disabled={savingTask === task.id}
+                         className={`bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600 ${savingTask === task.id ? 'opacity-50 cursor-not-allowed' : ''}`}
+@@ -306,6 +336,7 @@
+                     <div className="flex space-x-2 ml-2">
+                       <button
++                        type="button"
+                         onClick={() => startEditing(task)}
+                         className="text-blue-500 hover:text-blue-700"
+                       >
+@@ -315,6 +346,7 @@
+                       <button
++                        type="button"
+                         onClick={(e) => {
+                           e.preventDefault();
+                           e.stopPropagation();
+                           deleteTask(task.id);
+                         }}
+                         disabled={deletingTask === task.id}
+                         className={`text-red-500 hover:text-red-700 ${deletingTask === task.id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                       >
+                         {deletingTask === task.id ? 'Deleting...' : 'Delete'}
+                       </button>

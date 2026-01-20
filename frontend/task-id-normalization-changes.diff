@@ -1,0 +1,116 @@
+diff --git a/app/page.tsx b/app/page.tsx
+index ...
+--- a/app/page.tsx
++++ b/app/page.tsx
+@@ -34,9 +34,13 @@
+   const loadTasks = async () => {
+     try {
+       const data = await apiClient.get<Task[]>('/api/tasks');
++      // Normalize task IDs to numbers to handle potential type mismatches
++      const normalizedData = data.map(task => ({
++        ...task,
++        id: Number(task.id)
++      }));
+-      setTasks(data);
++      setTasks(normalizedData);
+     } catch (error) {
+       console.error('Failed to load tasks:', error);
+       // If unauthorized, redirect to login
+@@ -55,9 +55,13 @@
+   const refreshTasks = async () => {
+     setIsRefreshing(true);
+     try {
+       const data = await apiClient.get<Task[]>('/api/tasks');
++      // Normalize task IDs to numbers to handle potential type mismatches
++      const normalizedData = data.map(task => ({
++        ...task,
++        id: Number(task.id)
++      }));
+-      setTasks(data);
++      setTasks(normalizedData);
+     } catch (error) {
+       console.error('Failed to refresh tasks:', error);
+       // If unauthorized, redirect to login
+@@ -77,9 +77,13 @@
+   const createTask = async (e: React.FormEvent) => {
+     e.preventDefault();
+
+     try {
+       const createdTask = await apiClient.post<Task>('/api/tasks', newTask);
++      // Normalize the new task's ID to number
++      const normalizedTask = {
++        ...createdTask,
++        id: Number(createdTask.id)
++      };
+-      setTasks(prevTasks => [...prevTasks, createdTask]);
++      setTasks(prevTasks => [...prevTasks, normalizedTask]);
+       setNewTask({ title: '', description: '' });
+     } catch (error) {
+       console.error('Failed to create task:', error);
+@@ -84,5 +84,5 @@
+   const toggleTaskCompletion = async (taskId: number) => {
+     setTogglingTask(taskId);
+
+     try {
+       const updatedTask = await apiClient.patch<Task>(`/api/tasks/${taskId}/complete`);
+
+       // Update the task in the local state using numeric comparison to handle potential type mismatches
+-      setTasks(prevTasks => prevTasks.map(task =>
+-        task.id === taskId ? updatedTask : task
+-      ));
++      setTasks(prevTasks => prevTasks.map(task =>
++        Number(task.id) === Number(taskId) ? updatedTask : task
++      ));
+     } catch (error) {
+       console.error('Failed to update task:', error);
+@@ -106,5 +106,5 @@
+   const deleteTask = async (taskId: number) => {
+     // Prevent double deletion by checking if already deleting
+     if (deletingTask === taskId) return;
+
+     setDeletingTask(taskId);
+
+     try {
+       await apiClient.delete(`/api/tasks/${taskId}`);
+
+       // Remove the task from the local state using numeric comparison to handle potential type mismatches
+-      setTasks(prevTasks => prevTasks.filter(task => task.id !== taskId));
++      setTasks(prevTasks => prevTasks.filter(task => Number(task.id) !== Number(taskId)));
+     } catch (error) {
+       console.error('Failed to delete task:', error);
+@@ -141,17 +141,17 @@
+   const saveEditedTask = async (taskId: number) => {
+-    if (!editingTask || editingTask.id !== taskId) return;
++    if (!editingTask || Number(editingTask.id) !== Number(taskId)) return;
+
+     setSavingTask(taskId);
+     setSaveError(null);
+
+     try {
+       const updatedTask = await apiClient.put<Task>(`/api/tasks/${taskId}`, {
+         title: editingTask.title,
+         description: editingTask.description,
+-        completed: tasks.find(t => t.id === taskId)?.completed
++        completed: tasks.find(t => Number(t.id) === Number(taskId))?.completed
+       });
+
+       // Update the task in the local state using numeric comparison to handle potential type mismatches
+-      setTasks(prevTasks => prevTasks.map(task =>
+-        task.id === taskId ? updatedTask : task
+-      ));
++      setTasks(prevTasks => prevTasks.map(task =>
++        Number(task.id) === Number(taskId) ? updatedTask : task
++      ));
+
+       setEditingTask(null);
+     } catch (error) {
+       console.error('Failed to update task:', error);
+@@ -129,7 +129,7 @@
+   const startEditing = (task: Task) => {
+     setEditingTask({
+-      id: task.id,
++      id: Number(task.id), // Normalize to number
+       title: task.title,
+       description: task.description
+     });
+   };

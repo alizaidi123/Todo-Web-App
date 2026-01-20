@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(powershell -ExecutionPolicy Bypass -File .specify/scripts/powershell/check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks)",
+      "Bash(npx tsc --noEmit)",
+      "Bash(find . -name \"*.py\" -exec grep -l \"tasks\" {} ;)",
+      "Bash(.specify/scripts/powershell/check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks)",
+      "Bash(git fetch --all --prune)",
+      "Bash(ls -la *.txt)",
+      "Bash(.specify/scripts/powershell/setup-plan.ps1 -Json)",
+      "Skill(sp.constitution)",
+      "Skill(sp.specify)",
+      "Skill(sp.plan)",
+      "Skill(sp.implement)"
+    ]
+  }
+}

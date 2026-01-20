@@ -1,0 +1,203 @@
+# API Contracts: UI Redesign for Tasks Dashboard
+
+## Task Management API
+
+### GET /api/tasks
+**Description**: Retrieve all tasks for the authenticated user
+
+#### Request
+- **Method**: GET
+- **Headers**: Authorization: Bearer {token}
+- **Body**: None
+- **Authentication**: Required
+
+#### Response
+- **Success (200)**:
+  ```
+  [
+    {
+      "id": 1,
+      "title": "Sample task",
+      "description": "Task description",
+      "completed": false,
+      "user_id": 1,
+      "created_at": "2023-01-01T00:00:00Z",
+      "updated_at": "2023-01-01T00:00:00Z"
+    }
+  ]
+  ```
+
+- **Unauthorized (401)**:
+  ```
+  {
+    "error": "Unauthorized",
+    "message": "Invalid or missing token"
+  }
+  ```
+
+### POST /api/tasks
+**Description**: Create a new task
+
+#### Request
+- **Method**: POST
+- **Headers**:
+  - Authorization: Bearer {token}
+  - Content-Type: application/json
+- **Body**:
+  ```
+  {
+    "title": "Task title",
+    "description": "Task description"  // optional
+  }
+  ```
+- **Authentication**: Required
+
+#### Response
+- **Success (201)**:
+  ```
+  {
+    "id": 2,
+    "title": "Task title",
+    "description": "Task description",
+    "completed": false,
+    "user_id": 1,
+    "created_at": "2023-01-01T00:00:00Z",
+    "updated_at": "2023-01-01T00:00:00Z"
+  }
+  ```
+
+- **Bad Request (400)**:
+  ```
+  {
+    "error": "Validation Error",
+    "message": "Title is required"
+  }
+  ```
+
+- **Unauthorized (401)**:
+  ```
+  { "error": "Unauthorized" }
+  ```
+
+### PUT /api/tasks/{id}
+**Description**: Update an existing task
+
+#### Request
+- **Method**: PUT
+- **Headers**:
+  - Authorization: Bearer {token}
+  - Content-Type: application/json
+- **Path Parameters**: id (number)
+- **Body**:
+  ```
+  {
+    "title": "Updated title",
+    "description": "Updated description",  // optional
+    "completed": false
+  }
+  ```
+- **Authentication**: Required
+
+#### Response
+- **Success (200)**:
+  ```
+  {
+    "id": 2,
+    "title": "Updated title",
+    "description": "Updated description",
+    "completed": false,
+    "user_id": 1,
+    "created_at": "2023-01-01T00:00:00Z",
+    "updated_at": "2023-01-02T00:00:00Z"
+  }
+  ```
+
+- **Not Found (404)**:
+  ```
+  { "error": "Task not found" }
+  ```
+
+- **Unauthorized (401)**:
+  ```
+  { "error": "Unauthorized" }
+  ```
+
+### PATCH /api/tasks/{id}/complete
+**Description**: Toggle task completion status
+
+#### Request
+- **Method**: PATCH
+- **Headers**: Authorization: Bearer {token}
+- **Path Parameters**: id (number)
+- **Body**: None
+- **Authentication**: Required
+
+#### Response
+- **Success (200)**:
+  ```
+  {
+    "id": 2,
+    "title": "Task title",
+    "description": "Task description",
+    "completed": true,  // toggled status
+    "user_id": 1,
+    "created_at": "2023-01-01T00:00:00Z",
+    "updated_at": "2023-01-02T00:00:00Z"
+  }
+  ```
+
+- **Success (204)**: No content returned in some implementations
+
+- **Not Found (404)**:
+  ```
+  { "error": "Task not found" }
+  ```
+
+- **Unauthorized (401)**:
+  ```
+  { "error": "Unauthorized" }
+  ```
+
+### DELETE /api/tasks/{id}
+**Description**: Delete a task
+
+#### Request
+- **Method**: DELETE
+- **Headers**: Authorization: Bearer {token}
+- **Path Parameters**: id (number)
+- **Body**: None
+- **Authentication**: Required
+
+#### Response
+- **Success (204)**: No content
+
+- **Not Found (404)**:
+  ```
+  { "error": "Task not found" }
+  ```
+
+- **Unauthorized (401)**:
+  ```
+  { "error": "Unauthorized" }
+  ```
+
+## Error Handling
+
+### Standard Error Format
+```
+{
+  "error": "Error Type",
+  "message": "Human-readable error message"
+}
+```
+
+### Common Error Codes
+- **400**: Bad Request - Invalid request format
+- **401**: Unauthorized - Missing or invalid authentication
+- **404**: Not Found - Requested resource does not exist
+- **500**: Internal Server Error - Unexpected server error
+
+## Authentication
+- All endpoints require valid Bearer token in Authorization header
+- Token is obtained during login process
+- Token must be refreshed if expired
