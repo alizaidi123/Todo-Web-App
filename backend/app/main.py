@@ -2,6 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.routes import tasks
 from app.routes.auth import router as auth_router
+from app.routes.chat import router as chat_router
+from app.routes.session import router as session_router
 from database.init_db import create_db_and_tables
 
 
@@ -25,6 +27,8 @@ def create_app():
     # Include routes
     app.include_router(tasks.router)
     app.include_router(auth_router)
+    app.include_router(chat_router)
+    app.include_router(session_router)
 
     @app.get("/")
     def read_root():

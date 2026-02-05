@@ -1,0 +1,56 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+.next/
+dist/
+build/
+out/
+
+# Environment variables
+.env*
+!.env.example
+
+# Logs
+*.log
+
+# Coverage
+coverage/
+.nyc_output/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# IDE specific
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Next.js
+.next/
+out/
+.svelte-kit/
+.craftsman/
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Debug
+debug.log
+
+# Temporary files
+*.tmp
+*.temp
+.tmp/
+.temp/
+
+# System
+ehthumbs.db
+Icon?
+Network Trash Folder
+Temporary Items

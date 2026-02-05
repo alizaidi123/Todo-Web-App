@@ -320,6 +320,12 @@ export default function Dashboard() {
           {/* Action Buttons */}
           <div className="flex space-x-2">
             <NeonButton
+              onClick={() => router.push('/chat')}
+              variant="primary"
+            >
+              Chat with AI
+            </NeonButton>
+            <NeonButton
               onClick={refreshTasks}
               disabled={isRefreshing}
               variant="secondary"

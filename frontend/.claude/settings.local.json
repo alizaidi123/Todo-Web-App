@@ -11,7 +11,18 @@
       "Skill(sp.constitution)",
       "Skill(sp.specify)",
       "Skill(sp.plan)",
-      "Skill(sp.implement)"
+      "Skill(sp.implement)",
+      "Bash(dir D:todo-appfrontendappchat)",
+      "Bash(dir \"D:\\\\todo-app\\\\frontend\\\\app\\\\chat\")",
+      "Bash(node D:todo-appfrontendverify_chat_fix.js)",
+      "Bash(del \"D:\\\\todo-app\\\\frontend\\\\verify_chat_fix.js\")",
+      "Bash(cmd /c del \"D:\\\\todo-app\\\\frontend\\\\verify_chat_fix.js\")",
+      "Bash(powershell -Command \".specify/scripts/powershell/check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks\")",
+      "Bash(node verify_chat_fix.js)",
+      "Bash(node verify_chat_fix_correct.js)",
+      "Bash(find . -name \"*.py\" -exec grep -l \"auth/me\\\\|def.*me\\\\|@app.get.*auth\" {} ;)",
+      "Bash(cd /d D:todo-appfrontend)",
+      "Bash(node verify_chat_auth_fix.js)"
     ]
   }
 }
