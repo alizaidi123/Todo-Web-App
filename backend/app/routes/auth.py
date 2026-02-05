@@ -5,9 +5,10 @@ from typing import Optional
 import os
 from pydantic import BaseModel
 
-from app.user_models import User, UserCreate, Token, UserResponse
+from app.user_models import User, UserCreate, Token, UserResponse, UserMeResponse
+from auth.jwt_handler import TokenData
 from database.connection import get_session
-from auth.jwt_handler import create_access_token
+from auth.jwt_handler import create_access_token, get_current_user
 from passlib.context import CryptContext
 
 router = APIRouter(tags=["auth"])
@@ -90,3 +91,33 @@ def login_user(login_request: LoginRequest, session: Session = Depends(get_sessi
     )
 
     return {"access_token": access_token, "token_type": "bearer"}
+
+
+def get_user_by_id(user_id: int, session: Session) -> Optional[User]:
+    """Get user by ID from database"""
+    statement = select(User).where(User.id == user_id)
+    user = session.exec(statement).first()
+    return user
+
+
+@router.get("/auth/me", response_model=UserMeResponse)
+def get_current_user_info(
+    current_user: TokenData = Depends(get_current_user),
+    session: Session = Depends(get_session)
+):
+    """Get current user information from token and database"""
+    # Get the user details from the database using the user_id from the token
+    user = get_user_by_id(current_user.user_id, session)
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+
+    # Return user info including user_id from token and username/email from database
+    return UserMeResponse(
+        user_id=current_user.user_id,
+        username=user.username,
+        email=user.email
+    )

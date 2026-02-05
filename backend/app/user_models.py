@@ -64,3 +64,9 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     user_id: Optional[int] = None
+
+
+class UserMeResponse(BaseModel):
+    user_id: int
+    username: Optional[str] = None
+    email: Optional[str] = None

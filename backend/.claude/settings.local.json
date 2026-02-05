@@ -12,7 +12,22 @@
       "Bash(pip install python-dotenv)",
       "Bash(python start_server.py)",
       "Bash(python test_fixes.py)",
-      "Bash(python repair_task_schema.py)"
+      "Bash(python repair_task_schema.py)",
+      "Bash(set -a)",
+      "Bash(source .env)",
+      "Bash(set +a)",
+      "Bash(python -m alembic revision --autogenerate -m \"add priority field to task table\")",
+      "Bash(python verify_migration_fix.py)",
+      "Bash(python -m alembic current)",
+      "Bash(python -m alembic heads)",
+      "Bash(python test_json_parsing.py)",
+      "Bash(.specify/scripts/powershell/check-prerequisites.ps1 -Json)",
+      "Bash(python -c \"from app.main import app; print\\(''App loaded successfully''\\)\")",
+      "Bash(JWT_SECRET_KEY=testkey python -c \"from app.main import app; print\\(''App loaded successfully with new /auth/me endpoint''\\)\")",
+      "Bash(JWT_SECRET_KEY=testkey python -c \"from app.main import app; print\\(''Application loads successfully with /auth/me endpoint''\\)\")",
+      "Bash(.specify/scripts/powershell/check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks)",
+      "Bash(python -c \"import uuid; print\\(uuid.uuid4\\(\\).hex[:16]\\)\")",
+      "Bash(python test_priority_fix.py)"
     ]
   }
 }
