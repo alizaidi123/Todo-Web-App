@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { getToken } from '@/lib/auth-utils';
 import axios from 'axios';
+import { getApiBase } from '@/lib/apiBase';
 import ChatClient from './ChatClient';
 
 const ChatPage = () => {
@@ -27,8 +28,8 @@ const ChatPage = () => {
       }
 
       try {
-        // Determine API base URL - use environment variable or fallback
-        const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+        // Use the canonical API base resolver
+        const API_BASE = getApiBase();
 
         // Call the backend /auth/me API to get user ID
         const response = await axios.get(`${API_BASE}/auth/me`, {
