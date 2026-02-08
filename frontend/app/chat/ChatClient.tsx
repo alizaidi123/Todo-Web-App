@@ -12,6 +12,7 @@ import {
 } from '@chatscope/chat-ui-kit-react';
 import '@chatscope/chat-ui-kit-styles/dist/default/styles.min.css';
 import axios from 'axios';
+import { getApiBase } from '@/lib/apiBase';
 
 interface Message {
   id: number;
@@ -75,8 +76,8 @@ const ChatClient: React.FC<ChatClientProps> = ({ userId }) => {
     setIsLoading(true);
 
     try {
-      // Determine API base URL - use environment variable or fallback
-      const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+      // Use the canonical API base resolver
+      const API_BASE = getApiBase();
 
       // Call the backend chat API
       const response = await axios.post(`${API_BASE}/api/${userId}/chat`, {

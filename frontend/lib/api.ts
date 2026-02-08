@@ -1,12 +1,12 @@
 import { authenticatedFetch } from './auth-utils';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8000';
+import { getApiBase } from './apiBase';
 
 class ApiClient {
   private baseUrl: string;
 
   constructor() {
-    this.baseUrl = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
+    // getApiBase() already strips trailing slash, no need to do it again
+    this.baseUrl = getApiBase();
   }
 
   private async request(endpoint: string, options: RequestInit = {}) {

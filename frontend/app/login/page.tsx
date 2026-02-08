@@ -6,6 +6,7 @@ import Link from 'next/link';
 import GlassCard from '@/components/GlassCard';
 import NeonButton from '@/components/NeonButton';
 import NeonInput from '@/components/NeonInput';
+import { getApiBase } from '@/lib/apiBase';
 
 export default function LoginPage() {
   const [username, setUsername] = useState('');
@@ -17,7 +18,8 @@ export default function LoginPage() {
     e.preventDefault();
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8000'}/auth/login`, {
+      const API_BASE = getApiBase();
+      const response = await fetch(`${API_BASE}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

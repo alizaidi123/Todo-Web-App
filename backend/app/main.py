@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.routes import tasks
@@ -11,9 +12,20 @@ def create_app():
     app = FastAPI(title="Todo API", version="0.1.0")
 
     # CORS middleware with specific allowed origins
+    # Allow localhost for development
+    allowed_origins = ["http://localhost:3000", "http://localhost:3001", "http://127.0.0.1:3000"]
+
+    # Allow HuggingFace Space domain
+    allowed_origins.append("https://alisaboor3-todo-app.hf.space")
+
+    # Allow Vercel deployment domain if available
+    vercel_url = os.getenv("VERCEL_URL")
+    if vercel_url:
+        allowed_origins.append(f"https://{vercel_url}")
+
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["http://localhost:3000", "http://localhost:3001"],
+        allow_origins=allowed_origins,
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
